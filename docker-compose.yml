@@ -1,0 +1,26 @@
+# all services
+
+services:
+  auth-service:
+    build: ./users
+    container_name: auth-service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - auth-db
+    environment:
+      DB_NAME: trello_auth
+      DB_USER: postgres
+      DB_PASSWORD: 12345
+      DB_HOST: auth-db
+      DB_PORT: 5432
+
+  auth-db:
+    image: postgres:16
+    container_name: auth_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: trello_auth
