@@ -1,15 +1,17 @@
+from django.contrib.auth import login
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User, UserProfile
-from .serializers import UserRegisterationSerializer, UserSerializer
+from .serializers import LoginSerializer, UserRegisterationSerializer, UserSerializer
 from .tasks import send_welcome_email
 
 
 class UserRegisterationView(APIView):
     permission_classes = [permissions.AllowAny]
+    serializer_class = UserRegisterationSerializer
 
     def post(self, request):
         serializer = UserRegisterationSerializer(data=request.data)
@@ -32,6 +34,32 @@ class UserRegisterationView(APIView):
                     },
                 },
                 status=status.HTTP_201_CREATED,
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserLoginView(APIView):
+    serializer_class = LoginSerializer
+
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data["user"]
+            login(request, user)
+
+            refresh = RefreshToken.for_user(user)
+
+            return Response(
+                {
+                    "message": "Login successful",
+                    "user": UserSerializer(user).data,
+                    "tokens": {
+                        "refresh": str(refresh),
+                        "access": str(refresh.access_token),
+                    },
+                },
+                status=status.HTTP_200_OK,
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

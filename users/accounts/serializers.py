@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
@@ -66,3 +67,25 @@ class UserSerializer(serializers.ModelSerializer):
             "last_login",
         ]
         read_only_fields = ["id", "date_joined", "last_login"]
+
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
+
+    def validate(self, data):
+        email = data.get("email")
+        password = data.get("password")
+
+        if email and password:
+            user = authenticate(username=email, password=password)
+            if user:
+                if user.is_verified:
+                    data["user"] = user
+                    return data
+                else:
+                    raise serializers.ValidationError("User Account is not verified")
+            else:
+                raise serializers.ValidationError("Authentication faild for this email")
+        else:
+            raise serializers.ValidationError("Email & password are required")
