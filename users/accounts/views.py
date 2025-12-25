@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth import login
 from rest_framework import permissions, status
 from rest_framework.response import Response
@@ -7,6 +9,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User, UserProfile
 from .serializers import LoginSerializer, UserRegisterationSerializer, UserSerializer
 from .tasks import send_welcome_email
+
+# create logger
+logger = logging.getLogger(__name__)
 
 
 class UserRegisterationView(APIView):
@@ -47,6 +52,7 @@ class UserLoginView(APIView):
         if serializer.is_valid():
             user = serializer.validated_data["user"]
             login(request, user)
+            logger.info("User Logged in successfully")
 
             refresh = RefreshToken.for_user(user)
 
@@ -62,4 +68,5 @@ class UserLoginView(APIView):
                 status=status.HTTP_200_OK,
             )
 
+        logger.error(f"Login Failed - serializer error : {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
