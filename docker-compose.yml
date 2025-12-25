@@ -8,13 +8,18 @@ services:
       - "8000:8000"
     depends_on:
       - auth-db
+      - auth-celery
+      - rabbitmq
     environment:
       DB_NAME: trello_auth
       DB_USER: postgres
       DB_PASSWORD: 12345
       DB_HOST: auth-db
       DB_PORT: 5432
-
+      CELERY_BROKER_URL: amqp://guest:guest@rabbitmq:5672//
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    volumes:
+      - ./users:/app
   auth-db:
     image: postgres:16
     container_name: auth_db
@@ -24,3 +29,52 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12345
       POSTGRES_DB: trello_auth
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7.4.7-alpine
+    container_name: redis-service
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:4.2.1-management
+    container_name: rabbitmq-service
+    ports:
+      - "5672:5672"
+      - "15672:15672" # managment ui
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  auth-celery:
+    build: ./users
+    container_name: auth-celery
+    depends_on:
+      - redis
+      - rabbitmq
+    environment:
+      DB_NAME: trello_auth
+      DB_USER: postgres
+      DB_PASSWORD: 12345
+      DB_HOST: auth-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://guest:guest@rabbitmq:5672//
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    command: sh -c "celery -A users worker --loglevel=info"
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: auth_pgadmin
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    depends_on:
+      - auth-db
+
+volumes:
+  auth_db_data:

@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
+from django.conf.global_settings import MEDIA_ROOT
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -32,6 +34,7 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", [])
 # Application definition
 
 INSTALLED_APPS = [
+    "accounts",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -40,7 +43,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Thrid Party Apps
     "rest_framework",
+    "rest_framework_simplejwt",
+    "drf_yasg",
     # Our Apps
+    # "accounts",
 ]
 
 MIDDLEWARE = [
@@ -123,8 +129,29 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
-
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+MEDIA_URL = "media/"
+MEDIA_ROOT = "media/"
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# rest framework settings
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    )
+}
+
+
+# celery config
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "amqp://guest:guest@rabbitmq:5672//")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
+
+
+# Custom User model
+AUTH_USER_MODEL = "accounts.User"
