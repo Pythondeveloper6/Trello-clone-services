@@ -7,7 +7,12 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User, UserProfile
-from .serializers import LoginSerializer, UserRegisterationSerializer, UserSerializer
+from .serializers import (
+    LoginSerializer,
+    UserProfileSerializer,
+    UserRegisterationSerializer,
+    UserSerializer,
+)
 from .tasks import send_welcome_email
 
 # create logger
@@ -70,3 +75,21 @@ class UserLoginView(APIView):
 
         logger.error(f"Login Failed - serializer error : {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserProfileView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            profile = request.user.profile
+            serializer = UserProfileSerializer(profile).data
+            return Response(serializer)
+
+        except UserProfile.DoesNotExist:
+            profile = UserProfile.objects.create(user=request.user)
+            serializer = UserProfileSerializer(profile).data
+            return Response(serializer)
+
+    def put(self, request):
+        pass
