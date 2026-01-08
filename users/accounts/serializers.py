@@ -102,3 +102,35 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ["email", "username", "first_name", "last_name", "date_joined", "bio"]
+
+
+class PasswordChangeSerializer(serializers.Serializer):
+    current_password = serializers.CharField(
+        write_only=True, help_text="enter current password"
+    )
+    new_password = serializers.CharField(
+        write_only=True, min_length=8, help_text="enter new password (min 8 char)"
+    )
+    new_password_confirm = serializers.CharField(
+        write_only=True, help_text="enter password confirmation"
+    )
+
+    def validate_current_password(self, value):
+        user = self.context["request"].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("current password is not correct")
+        return value
+
+    def validate(self, data):
+        if data["new_password"] != data["new_password_confirm"]:
+            raise serializers.ValidationError("New password dont match")
+
+        # use django validation to vzalidate new password
+        validate_password(data["new_password"])
+        return data
+
+    def save(self):
+        user = self.context["request"].user
+        user.set_password(self.validated_data["new_password"])
+        user.save()
+        return user
