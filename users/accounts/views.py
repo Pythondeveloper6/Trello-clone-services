@@ -23,6 +23,21 @@ class UserRegisterationView(APIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = UserRegisterationSerializer
 
+    def get_serializer_class(self):
+        return self.serializer_class
+
+    def get_serializer(self, *args, **kwargs):
+        serializer_class = self.get_serializer_class()
+        kwargs['context'] = self.get_serializer_context()
+        return serializer_class(*args, **kwargs)
+
+    def get_serializer_context(self):
+        return {
+            'request': self.request,
+            'format': self.format_kwarg,
+            'view': self
+        }
+
     def post(self, request):
         serializer = UserRegisterationSerializer(data=request.data)
         if serializer.is_valid():
@@ -52,6 +67,21 @@ class UserRegisterationView(APIView):
 class UserLoginView(APIView):
     serializer_class = LoginSerializer
 
+    def get_serializer_class(self):
+        return self.serializer_class
+
+    def get_serializer(self, *args, **kwargs):
+        serializer_class = self.get_serializer_class()
+        kwargs['context'] = self.get_serializer_context()
+        return serializer_class(*args, **kwargs)
+
+    def get_serializer_context(self):
+        return {
+            'request': self.request,
+            'format': self.format_kwarg,
+            'view': self
+        }
+
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -79,6 +109,22 @@ class UserLoginView(APIView):
 
 class UserProfileView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserProfileSerializer
+
+    def get_serializer_class(self):
+        return self.serializer_class
+
+    def get_serializer(self, *args, **kwargs):
+        serializer_class = self.get_serializer_class()
+        kwargs['context'] = self.get_serializer_context()
+        return serializer_class(*args, **kwargs)
+
+    def get_serializer_context(self):
+        return {
+            'request': self.request,
+            'format': self.format_kwarg,
+            'view': self
+        }
 
     def get(self, request):
         try:
