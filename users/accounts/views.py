@@ -1,7 +1,7 @@
 import logging
 
 from django.contrib.auth import login
-from rest_framework import permissions, status
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -154,3 +154,30 @@ class PasswordChangeView(APIView):
             return Response({"message": "Password changed successfully"})
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserListView(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = User.objects.all()
+
+        # filter : email
+        email = self.request.query_params("email")
+        if email:
+            queryset = queryset.filter(email__icontains=email)
+
+        # filter : username
+        username = self.request.query_params("username")
+        if email:
+            queryset = queryset.filter(username__icontains=username)
+
+        return queryset
+
+
+class UserDetailView(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
