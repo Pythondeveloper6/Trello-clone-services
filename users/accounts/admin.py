@@ -9,6 +9,25 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ["is_verified", "date_joined"]
     search_fields = ["email", "first_name", "last_name", "username"]
 
+    fieldsets = (
+        (None, {"fields": ("email", "username", "password")}),
+        ("Personal Info", {"fields": ("first_name", "last_name", "profile_picture")}),
+        (
+            "Permissions",
+            {
+                "fields": (
+                    "is_active",
+                    "is_verified",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                )
+            },
+        ),
+        ("Important Dates", {"fields": ("last_login", "date_joined")}),
+    )
+
 
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ["user", "created_at", "updated_at"]
