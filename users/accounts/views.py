@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import User, UserProfile
+from .models import User, UserProfile , UserVerification
 from .serializers import (
     LoginSerializer,
     PasswordChangeSerializer,
@@ -14,7 +14,8 @@ from .serializers import (
     UserRegisterationSerializer,
     UserSerializer,
 )
-from .tasks import send_welcome_email
+from .tasks import send_verification_email
+from utils.generate_unique_number import generate_verification_code
 
 # create logger
 logger = logging.getLogger(__name__)
@@ -41,7 +42,12 @@ class UserRegisterationView(APIView):
             user = serializer.save()
 
             # send welcome email
-            send_welcome_email.delay({"email": user.email, "username": user.username})
+            # send_welcome_email.delay({"email": user.email, "username": user.username})
+            #
+            # send verification email
+            code = generate_verification_code()
+            UserVerification.objects.create(user=user,code=code)
+            send_verification_email.delay(user.id,code)
 
             # create jwt tokens for user
             refresh = RefreshToken.for_user(user)
@@ -165,13 +171,15 @@ class UserListView(generics.ListAPIView):
         queryset = User.objects.all()
 
         # filter : email
-        email = self.request.query_params("email")
+        print(f"----> {self.request}")
+        email = self.request.query_params.get("email")
+        print(email)
         if email:
             queryset = queryset.filter(email__icontains=email)
 
         # filter : username
-        username = self.request.query_params("username")
-        if email:
+        username = self.request.query_params.get("username")
+        if username:
             queryset = queryset.filter(username__icontains=username)
 
         return queryset
@@ -181,3 +189,41 @@ class UserDetailView(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+
+class VerifyEmailView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self,request):
+        email = request.data.get('email')
+        code = request.data.get('code')
+
+        try:
+            user = User.objects.get(email=email)
+            verification = user.verification
+            print(verification)
+
+            if verification.code == code :
+                # save user as is_verified
+                user.is_verified = True
+                user.save()
+
+                # cleanup verification code
+                verification.delete()
+
+                # return
+                return Response({"message":"your account was verified successfully"})
+
+            else:
+                return Response({"error":"you code is invalid or expired"} , status=400)
+
+        except User.DoesNotExist:
+            return Response({"error":"this user does not exist"},status=400)
+
+        except UserVerification.DoesNotExist:
+            return Response({"error":"no verification found for this user"},status=400)
+
+        except Exception as e:
+            print(f"----> {e}")
+            return Response({"error":"Error happend try again later "},status=400)

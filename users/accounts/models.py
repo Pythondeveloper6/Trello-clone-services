@@ -27,7 +27,7 @@ class User(AbstractUser):
     def get_full_name(self):
         if self.first_name and self.last_name:
             return f"{self.first_name} {self.last_name}"
-        return self.first_name or self.last_name or ""
+        return self.first_name or self.last_name or self.username
 
 
 class UserProfile(models.Model):
@@ -44,3 +44,10 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.email
+
+
+
+class UserVerification(models.Model):
+    user = models.OneToOneField(User , on_delete=models.CASCADE , related_name='verification')
+    code = models.CharField(max_length=10)
+    created_at = models.DateTimeField(auto_now_add=True)

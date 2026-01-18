@@ -188,6 +188,9 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0
 AUTH_USER_MODEL = "accounts.User"
 
 
+# mail settings
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
 # logger settings
 LOGGING = {
     "version": 1,
