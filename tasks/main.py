@@ -1,3 +1,4 @@
+from app.api.projects import projects_bp
 from app.core.config import settings
 from app.db.database import Base, create_tables
 from flask import Flask, jsonify
@@ -13,6 +14,8 @@ def create_app() -> Flask:
     # intiate flask-migrate
     migrate.init_app(app, db=None, directory="migrations")
 
+    # register app routes : blueprints
+    app.register_blueprint(projects_bp)
     return app
 
 

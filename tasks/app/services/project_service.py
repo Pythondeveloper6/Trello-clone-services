@@ -47,9 +47,9 @@ def create_project(project_data: ProjectCreate) -> ProjectResponse:
         )
 
         # add to db and save
-        db.add(db_project)
-        db.flush()
-        db.refresh(db_project)
+        db.add(db_project)  # add new object to current session
+        db.flush()  # create object without commit | get object id
+        db.refresh(db_project)  # return object from memoery with id
 
         return ProjectResponse.model_validate(db_project)
 
