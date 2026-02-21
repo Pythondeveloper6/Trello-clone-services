@@ -1,8 +1,6 @@
-from argparse import OPTIONAL
 from datetime import datetime
 from typing import List, Optional
 
-from app.models.projects import Project
 from pydantic import BaseModel, Field
 
 
