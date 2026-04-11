@@ -45,7 +45,7 @@ def get_task_by_id(task_id: int) -> Optional[TaskResponse]:
         return TaskResponse.model_validate(db_task)
 
 
-def get_users_tasks(user_id: str) -> List[TaskResponse]:
+def get_users_tasks(user_id: str, status: Optional[TaskStats]) -> List[TaskResponse]:
     with get_db_session() as db:
         query = (
             db.query(Task)
@@ -53,6 +53,10 @@ def get_users_tasks(user_id: str) -> List[TaskResponse]:
             .order_by(Task.created_at.desc())
             .all()
         )
+
+        if status:
+            query = query.filter(Task.status == status)
+
         return [TaskResponse.model_validate(task) for task in query]
 
 
