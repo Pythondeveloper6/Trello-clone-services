@@ -15,7 +15,7 @@ class Settings:
     DEBUG: bool = True
 
     # database settings
-    DATABASE_URL: str = "postgresql://postgress:password@localhost:5432/trell_tasks"
+    DATABASE_URL: str = "postgresql://postgres:12345@tasks-db:5432/trello_tasks"
 
 
 def get_settings() -> Settings:
@@ -30,7 +30,7 @@ def get_settings() -> Settings:
         DEBUG=os.getenv("DEBUG", "True"),
         # database settings
         DATABASE_URL=os.getenv(
-            "DATABASE_URL", "postgresql://postgress:12345@localhost:5432/trell_tasks"
+            "DATABASE_URL", "postgresql://postgres:12345@tasks-db:5432/trello_tasks"
         ),
     )
 

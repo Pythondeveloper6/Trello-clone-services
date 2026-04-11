@@ -24,3 +24,4 @@ class Board(Base):
 
     # relationships
     project = relationship("Project", back_populates="boards")
+    tasks = relationship("Task", back_populates="board")

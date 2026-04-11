@@ -92,9 +92,7 @@ def get_single_task(task_id):
         return jsonify({"error": f"Failed to get task : {e}"}), 500
 
 
-tasks_bp.route("/<int:task_id", methods=["PUT"])
-
-
+@tasks_bp.route("/<int:task_id>", methods=["PUT"])
 def update_existing_task(task_id: int):
     try:
         data = request.get_json()
@@ -113,7 +111,7 @@ def update_existing_task(task_id: int):
         return jsonify({"error": f"Failed to get task : {e}"}), 500
 
 
-@tasks_bp.route("/<int:task_id", methods=["DELETE"])
+@tasks_bp.route("/<int:task_id>", methods=["DELETE"])
 def delete_existing_task(task_id: int):
     try:
         task = get_task_by_id(task_id)
@@ -141,7 +139,7 @@ def get_statistics():
         return jsonify({"error": f"Failed to get tasks stats : {e}"}), 500
 
 
-@tasks_bp.route("//users/<user_id>", methods=["GET"])
+@tasks_bp.route("/users/<user_id>", methods=["GET"])
 def get_tasks_for_user(user_id):
     try:
         status_str = request.args.get("status")

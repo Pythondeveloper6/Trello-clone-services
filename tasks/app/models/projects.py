@@ -7,6 +7,7 @@ from datetime import datetime
 
 from app.models.tasks import Base
 from sqlalchemy import Column, DateTime, Integer, String, Text
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 
@@ -23,3 +24,6 @@ class Project(Base):
     # timestamp
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # relationships
+    boards = relationship("Board", back_populates="project")

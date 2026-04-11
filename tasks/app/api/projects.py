@@ -21,8 +21,8 @@ def list_projects():
     """get list of projects for the current user"""
 
     owner_id = request.args.get("owner_id")
-    limit = int(request.args.get("limit"))
-    offset = int(request.args.get("offset"))
+    limit = request.args.get("limit", 50)
+    offset = request.args.get("offset", 0)
 
     if not owner_id:
         return jsonify({"error": "owner_id parameter is required"}), 400

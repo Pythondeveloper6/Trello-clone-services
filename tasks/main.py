@@ -1,4 +1,6 @@
+from app.api.boards import board_bp
 from app.api.projects import projects_bp
+from app.api.tasks import tasks_bp
 from app.core.config import settings
 from app.db.database import Base, create_tables
 from flask import Flask, jsonify
@@ -16,10 +18,20 @@ def create_app() -> Flask:
 
     # register app routes : blueprints
     app.register_blueprint(projects_bp)
+    app.register_blueprint(tasks_bp)
+    app.register_blueprint(board_bp)
     return app
 
 
 app = create_app()
+
+
+def start_tasks():
+    create_tables()
+
+
+with app.app_context():
+    start_tasks()
 
 
 # health checker endpoint
