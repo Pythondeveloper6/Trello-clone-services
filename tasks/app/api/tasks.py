@@ -30,7 +30,7 @@ def create_new_task():
 
         task_data = TaskCreate(**data)
         created_task = create_task(task_data)
-        return jsonify(created_task.model_dump()), 201
+        return jsonify(created_task.model_dump(mode="json")), 201
     except Exception as e:
         return jsonify({"error": f"Faild to create new task: {str(e)}"}), 500
 
@@ -73,7 +73,7 @@ def list_tasks():
             offset=offset,
         )
 
-        tasks_data = [task.momp() for task in tasks]
+        tasks_data = [task.model_dump(mode="json") for task in tasks]
         return jsonify(tasks_data), 200
 
     except Exception as e:
@@ -86,7 +86,7 @@ def get_single_task(task_id):
         task = get_task_by_id(task_id)
         if not task:
             return jsonify({"error": "Task not found"}), 404
-        return jsonify(task.model_dumpt()), 200
+        return jsonify(task.model_dump(mode="json")), 200
 
     except Exception as e:
         return jsonify({"error": f"Failed to get task : {e}"}), 500
@@ -105,7 +105,7 @@ def update_existing_task(task_id: int):
 
         task_update = TaskUpdate(**data)
         updated_task = update_task(task_id, task_update)
-        return jsonify(updated_task.model_dump()), 200
+        return jsonify(updated_task.model_dump(mode="json")), 200
 
     except Exception as e:
         return jsonify({"error": f"Failed to get task : {e}"}), 500
@@ -151,7 +151,7 @@ def get_tasks_for_user(user_id):
                 return jsonify({"error": f"invalid status : {status_str}"}), 400
 
         tasks = get_users_tasks(user_id=user_id, status=status)
-        tasks_data = [task.momp() for task in tasks]
+        tasks_data = [task.model_dump(mode="json") for task in tasks]
         return jsonify(tasks_data), 200
 
     except Exception as e:

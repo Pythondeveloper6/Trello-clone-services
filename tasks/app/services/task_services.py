@@ -69,7 +69,7 @@ def create_task(task_data: TaskCreate) -> TaskResponse:
             priority=task_data.priority,
             user_id=task_data.user_id,
             assigned_to=task_data.assigned_to,
-            border_id=task_data.board_id,
+            board_id=task_data.board_id,
             due_date=task_data.due_date,
         )
         db.add(db_task)

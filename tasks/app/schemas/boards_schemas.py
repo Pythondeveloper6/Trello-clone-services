@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 class BoardBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=200, description="Project Name")
     description: Optional[str] = Field(None, description="Project Description")
-    project_id: str = Field(..., description="id of the project")
+    project_id: int = Field(..., description="id of the project")
     columns: List[str] = Field(default=["ToDo", "InProgress", "Done"])
 
 

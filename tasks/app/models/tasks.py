@@ -29,3 +29,6 @@ class Task(Base):
 
     # relationship
     board = relationship("Board", back_populates="tasks")
+
+    class Config:
+        use_enum_values = True

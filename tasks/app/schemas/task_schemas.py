@@ -37,7 +37,7 @@ class TaskUpdate(BaseModel):
 class TaskResponse(TaskBase):
     id: int = Field(..., description="task id")
     created_at: datetime = Field(..., description="task creation date")
-    updated_at: datetime = Field(..., description="task laast update date")
+    updated_at: Optional[datetime] = Field(None, description="task last update date")
 
     class Config:
         from_attributes = True

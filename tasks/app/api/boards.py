@@ -29,9 +29,9 @@ def create_new_board():
 @board_bp.route("/", methods=["GET"])
 def list_board():
     try:
-        project_id = int(request.args.get("project_id"))
-        limit = int(request.args.get("limit"))
-        offset = int(request.args.get("offset"))
+        project_id = request.args.get("project_id")
+        limit = request.args.get("limit", 50)
+        offset = request.args.get("offset", 0)
 
         if not project_id:
             return jsonify({"error": "project_id param is required"}), 400
