@@ -4,3 +4,4 @@ beanie==2.1.0
 redis==7.4.0
 python-dotenv==1.2.2
 pydantic-settings==2.13.1
+motor==3.7.1
