@@ -104,6 +104,32 @@ services:
     depends_on:
       - auth-db
 
+  mongodb:
+    image: mongo
+    container_name: history_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  history-service:
+    build: ./history
+    container_name: trello_history
+    ports:
+      - "8003:8003"
+    depends_on:
+      - mongodb
+      - redis
+      - rabbitmq
+    volumes:
+      - ./history:/app
+    environment:
+      - MONGO_URL=mongodb://localhost:27017
+      - DATABASE_NAME=trello_history
+      - HOST=0.0.0.0
+      - PORT=8003
+      - DEBUG=True
+
 volumes:
   auth_db_data:
   tasks_db_data:
