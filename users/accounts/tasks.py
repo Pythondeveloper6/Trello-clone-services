@@ -2,8 +2,7 @@ import logging
 
 from celery import shared_task
 from django.core.mail import send_mail
-
-from services.history.app.tasks.event_tasks import celery_app
+from users.celery import app as celery_app
 
 from .models import User
 

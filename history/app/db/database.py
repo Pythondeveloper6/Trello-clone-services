@@ -1,13 +1,13 @@
 from app.core.config import settings
 from app.models.models import Event
 from beanie import init_beanie
-from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import AsyncMongoClient
 
 
 async def connect_to_mongo():
     print("connecting to mongodb ...")
 
-    client = AsyncIOMotorClient(settings.MONGODB_URL)
+    client = AsyncMongoClient(settings.MONGODB_URL)
     database = client[settings.DATABASE_NAME]
 
     await init_beanie(database=database, document_models=[Event])
