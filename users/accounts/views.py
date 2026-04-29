@@ -5,8 +5,9 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from utils.generate_unique_number import generate_verification_code
 
-from .models import User, UserProfile , UserVerification
+from .models import User, UserProfile, UserVerification
 from .serializers import (
     LoginSerializer,
     PasswordChangeSerializer,
@@ -14,8 +15,7 @@ from .serializers import (
     UserRegisterationSerializer,
     UserSerializer,
 )
-from .tasks import send_verification_email
-from utils.generate_unique_number import generate_verification_code
+from .tasks import publish_history_event, send_verification_email
 
 # create logger
 logger = logging.getLogger(__name__)
@@ -46,8 +46,18 @@ class UserRegisterationView(APIView):
             #
             # send verification email
             code = generate_verification_code()
-            UserVerification.objects.create(user=user,code=code)
-            send_verification_email.delay(user.id,code)
+            UserVerification.objects.create(user=user, code=code)
+            send_verification_email.delay(user.id, code)
+
+            # publish to history
+            publish_history_event(
+                {
+                    "service": "auth",
+                    "action": "user_signup",
+                    "user_id": str(user.id),
+                    "details": {"email": user.email, "username": user.username},
+                }
+            )
 
             # create jwt tokens for user
             refresh = RefreshToken.for_user(user)
@@ -191,20 +201,19 @@ class UserDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
 
-
 class VerifyEmailView(APIView):
     permission_classes = [permissions.AllowAny]
 
-    def post(self,request):
-        email = request.data.get('email')
-        code = request.data.get('code')
+    def post(self, request):
+        email = request.data.get("email")
+        code = request.data.get("code")
 
         try:
             user = User.objects.get(email=email)
             verification = user.verification
             print(verification)
 
-            if verification.code == code :
+            if verification.code == code:
                 # save user as is_verified
                 user.is_verified = True
                 user.save()
@@ -213,17 +222,19 @@ class VerifyEmailView(APIView):
                 verification.delete()
 
                 # return
-                return Response({"message":"your account was verified successfully"})
+                return Response({"message": "your account was verified successfully"})
 
             else:
-                return Response({"error":"you code is invalid or expired"} , status=400)
+                return Response({"error": "you code is invalid or expired"}, status=400)
 
         except User.DoesNotExist:
-            return Response({"error":"this user does not exist"},status=400)
+            return Response({"error": "this user does not exist"}, status=400)
 
         except UserVerification.DoesNotExist:
-            return Response({"error":"no verification found for this user"},status=400)
+            return Response(
+                {"error": "no verification found for this user"}, status=400
+            )
 
         except Exception as e:
             print(f"----> {e}")
-            return Response({"error":"Error happend try again later "},status=400)
+            return Response({"error": "Error happend try again later "}, status=400)

@@ -46,5 +46,17 @@ async def get_event_by_id(event_id: str) -> Optional[EventResponse]:
     )
 
 
+async def create_event(event_data: dict):
+    event_create = EventCreate(**event_data)
+    event = Event(
+        service=event_create.service,
+        action=event_create.action,
+        user_id=event_create.user_id,
+        details=event_create.details,
+    )
+    await event.insert()
+    return event.id
+
+
 async def get_event_stats():
     pass

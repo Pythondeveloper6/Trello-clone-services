@@ -154,21 +154,11 @@ REST_FRAMEWORK = {
 # Swagger settings
 SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {
-        "Bearer": {
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
-        }
+        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}
     },
     "USE_SESSION_AUTH": False,
     "JSON_EDITOR": True,
-    "SUPPORTED_SUBMIT_METHODS": [
-        "get",
-        "post",
-        "put",
-        "delete",
-        "patch"
-    ]
+    "SUPPORTED_SUBMIT_METHODS": ["get", "post", "put", "delete", "patch"],
 }
 
 # simple jwt tokens config
@@ -182,7 +172,12 @@ SIMPLE_JWT = {
 # celery config
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "amqp://guest:guest@rabbitmq:5672//")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
-
+CELERY_TASK_IGNORE_RESULT = True
+CELERY_TASK_ROUTES = (
+    {
+        "app.tasks.event_task.process_event_background": {"queue": "history"},
+    },
+)
 
 # Custom User model
 AUTH_USER_MODEL = "accounts.User"
